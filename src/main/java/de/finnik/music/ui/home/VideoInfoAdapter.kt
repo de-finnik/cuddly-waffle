@@ -15,6 +15,7 @@ import android.widget.TextView
 import com.bawaviki.youtubedl_android.mapper.VideoInfo
 import de.finnik.music.R
 import de.finnik.music.ThumbnailStore
+import java.io.File
 import java.io.InputStream
 import java.net.URL
 
@@ -49,7 +50,7 @@ class VideoInfoAdapter(context: Context, store: ThumbnailStore, resource: Int, o
         }
 
         if(mStore.exists(info.id)) {
-            mContext?.scaleBitmapToDrawable(mStore.load(info.id))
+            //mContext?.scaleBitmapToDrawable(mStore.load(info.id))
         } else {
             DownloadThumbnailTask(holder.thumbnail, mContext!!, mStore).execute(info.thumbnail, info.id)
         }

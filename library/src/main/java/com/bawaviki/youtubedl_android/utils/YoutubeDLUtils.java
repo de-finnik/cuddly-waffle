@@ -1,18 +1,29 @@
 package com.bawaviki.youtubedl_android.utils;
 
+import com.bawaviki.youtubedl_android.mapper.VideoInfo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orhanobut.logger.Logger;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class YoutubeDLUtils {
+
+    public static VideoInfo readInfoFromJson(File file) throws IOException {
+        return new ObjectMapper().readValue(file, VideoInfo.class);
+    }
 
     public static void unzip(File zipFile, File targetDirectory) throws IOException {
         unzip(new FileInputStream(zipFile), targetDirectory);

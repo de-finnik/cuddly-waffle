@@ -11,9 +11,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.bawaviki.youtubedl_android.YoutubeDL
 import com.bawaviki.youtubedl_android.mapper.VideoInfo
+import de.finnik.music.Downloader
 import de.finnik.music.R
 import de.finnik.music.ThumbnailStore
 import de.finnik.music.ui.ProgressDialog
+import de.finnik.music.ui.Stream
+import java.io.File
 import java.lang.ref.WeakReference
 import kotlin.collections.ArrayList
 
@@ -45,7 +48,12 @@ class HomeFragment : Fragment() {
        }
         val list_video_info = root.findViewById<ListView>(R.id.list_result)
         list_video_info.adapter = adapter
-        activity?.application
+        list_video_info.setOnItemClickListener { adapterView: AdapterView<*>, view1: View, i: Int, l: Long ->
+            Downloader().download(adapter.getItem(i)!!.id, File(requireActivity().application.filesDir, "audio"))
+            val stream = Stream(requireContext(), adapter.getItem(i)!!)
+            stream.show(view1)
+        }
+
 
         return root
     }
@@ -75,7 +83,6 @@ class HomeFragment : Fragment() {
                 val fragment = fragmentReference.get()
                 val progress = progressReference.get()
                 Log.i("TAG", "onPostExecute: ${progress.hashCode()}")
-                progress?.hide()
                 fragment?.setVideoInfos(result!!)
                 ProgressDialog.hideAll()
             }
