@@ -20,16 +20,14 @@ import java.io.InputStream
 import java.net.URL
 
 
-class VideoInfoAdapter(context: Context, store: ThumbnailStore, resource: Int, objects: List<VideoInfo?>): ArrayAdapter<VideoInfo>(context, resource, objects){
+class VideoInfoAdapter(context: Context, resource: Int, objects: List<VideoInfo?>): ArrayAdapter<VideoInfo>(context, resource, objects){
     private val mContext: Context?
     private var mResource = 0
-    private val mStore: ThumbnailStore
 
 
     init {
         this.mContext = context
         this.mResource = resource
-        this.mStore = store
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -49,31 +47,22 @@ class VideoInfoAdapter(context: Context, store: ThumbnailStore, resource: Int, o
             holder = view.tag as InfoHolder
         }
 
-        if(mStore.exists(info.id)) {
-            //mContext?.scaleBitmapToDrawable(mStore.load(info.id))
-        } else {
-            DownloadThumbnailTask(holder.thumbnail, mContext!!, mStore).execute(info.thumbnail, info.id)
-        }
+        DownloadThumbnailTask(holder.thumbnail, mContext!!).execute(info.thumbnail, info.id)
         holder.title.text = info.fulltitle
         holder.uploader.text = info.uploader
         holder.length.text = mContext?.resources?.getString(R.string.duration, info.duration / 60, info.duration % 60)
         return view!!
     }
 
-    private class DownloadThumbnailTask(imageView: ImageView, context: Context, store: ThumbnailStore): AsyncTask<String, String, Drawable?>() {
+    private class DownloadThumbnailTask(imageView: ImageView, context: Context): AsyncTask<String, String, Drawable?>() {
 
         val imageView: ImageView
         val mContext: Context
-        val mStore: ThumbnailStore
         init {
             this.imageView = imageView
             this.mContext = context
-            mStore = store
         }
         override fun doInBackground(vararg params: String?): Drawable? {
-            val inputStream = URL(params[0]!!).content as InputStream
-            val bmp = BitmapFactory.decodeStream(inputStream)
-            mStore.store(bmp, params[1]!!)
             return mContext.scaledDrawable(params[0]!!)
         }
 

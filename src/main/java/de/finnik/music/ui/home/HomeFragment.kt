@@ -1,5 +1,6 @@
 package de.finnik.music.ui.home
 
+import android.media.MediaMetadataRetriever
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
@@ -35,7 +36,7 @@ class HomeFragment : Fragment() {
         homeViewModel =
                 ViewModelProvider(this).get(HomeViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_home, container, false)
-        adapter = VideoInfoAdapter(requireContext(), ThumbnailStore(requireActivity().application), R.layout.list_adapter, listInfo)
+        adapter = VideoInfoAdapter(requireContext(),  R.layout.list_adapter, listInfo)
         val et_search = root.findViewById<EditText>(R.id.et_search)
         val btn_search = root.findViewById<Button>(R.id.btn_search)
         val seekBar = root.findViewById<SeekBar>(R.id.sb_amount)
@@ -53,7 +54,6 @@ class HomeFragment : Fragment() {
             val stream = Stream(requireContext(), adapter.getItem(i)!!)
             stream.show(view1)
         }
-
 
         return root
     }

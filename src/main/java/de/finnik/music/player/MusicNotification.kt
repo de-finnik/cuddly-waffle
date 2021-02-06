@@ -34,8 +34,8 @@ class MusicNotification(val context: Context, val song: Song) {
     private fun setupBuilder(action: NotificationCompat.Action) {
         builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_notifications_black_24dp)
-            .setContentTitle(song.videoInfo.title)
-            .setContentText(song.videoInfo.uploader)
+            .setContentTitle(song.title)
+            .setContentText(song.artist)
             .setLargeIcon(song.thumbnail)
             .addAction(actionPrevious)
             .addAction(action)
@@ -50,6 +50,7 @@ class MusicNotification(val context: Context, val song: Song) {
 
     fun showPause() {
         setupBuilder(actionPause)
+        builder.setOngoing(true)
         showNotification()
     }
 

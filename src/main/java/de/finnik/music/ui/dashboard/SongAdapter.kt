@@ -49,8 +49,8 @@ class SongAdapter(context: Context, resource: Int, objects: List<Song>): ArrayAd
 
         holder.thumbnail.setImageDrawable(BitmapDrawable(context.resources, song.thumbnail))
         val info = song.videoInfo
-        holder.title.text = info.fulltitle
-        holder.uploader.text = info.uploader
+        holder.title.text = song.title
+        holder.uploader.text = song.artist
         holder.length.text = mContext?.resources?.getString(R.string.duration, info.duration / 60, info.duration % 60)
         return view!!
     }

@@ -11,10 +11,12 @@ class Downloader {
         val url = "https://youtu.be/$id"
         val request = YoutubeDLRequest(url)
         request.setOption("-x")
-        request.setOption("--audio-format", "mp3")
+        request.setOption("--audio-format", "opus")
         request.setOption("--write-info-json")
         request.setOption("--write-thumbnail")
-        request.setOption("-o", dir.absolutePath +"/%(id)s.mp3")
+        request.setOption("--cache-dir", File(dir.parentFile, ".cache").absolutePath)
+        request.setOption("--add-metadata")
+        request.setOption("-o", dir.absolutePath +"/%(id)s.%(ext)s")
         val response = YoutubeDL.getInstance().execute(request)
         Log.i("TAG", "download: $response")
     }

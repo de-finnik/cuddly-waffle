@@ -78,6 +78,7 @@ class DashboardFragment : Fragment() {
 
     fun loadSongs() {
         val dir = File(requireActivity().application.filesDir, "audio")
+        dir.mkdirs()
         songList.clear()
         songList.addAll(Song.findSongs(dir))
         adapter.notifyDataSetChanged()
