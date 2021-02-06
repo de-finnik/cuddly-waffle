@@ -13,6 +13,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import de.finnik.music.R
 import de.finnik.music.Song
+import de.finnik.music.Utils
 import java.io.File
 
 class MusicNotification(val context: Context, val song: Song) {
@@ -22,6 +23,7 @@ class MusicNotification(val context: Context, val song: Song) {
     private val actionPause: NotificationCompat.Action
     private val actionNext: NotificationCompat.Action
     private val actionPrevious: NotificationCompat.Action
+    private val color = Utils.averageColor(song.thumbnail)
     init {
         actionPlay = NotificationCompat.Action(R.drawable.ic_play, "Play", pendingIntent(context, MusicPlayerService.ACTION_PLAY))
         actionPause = NotificationCompat.Action(R.drawable.ic_pause, "Pause", pendingIntent(context, MusicPlayerService.ACTION_PAUSE))
@@ -40,6 +42,7 @@ class MusicNotification(val context: Context, val song: Song) {
             .addAction(actionPrevious)
             .addAction(action)
             .addAction(actionNext)
+            .setColor(color)
             .setStyle(androidx.media.app.NotificationCompat.MediaStyle().setShowActionsInCompactView(0,1,2))
     }
 

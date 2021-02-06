@@ -10,9 +10,4 @@
         android:id="@+id/list_download"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
-
-    <com.arges.sepan.argmusicplayer.PlayerViews.ArgPlayerLargeView
-        android:id="@+id/argmusicplayer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
 </LinearLayout>

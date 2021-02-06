@@ -63,7 +63,8 @@ class VideoInfoAdapter(context: Context, resource: Int, objects: List<VideoInfo?
             this.mContext = context
         }
         override fun doInBackground(vararg params: String?): Drawable? {
-            return mContext.scaledDrawable(params[0]!!)
+            val inputStream = URL(params[0]!!).content as InputStream
+            return BitmapDrawable(mContext.resources, BitmapFactory.decodeStream(inputStream))
         }
 
         override fun onPostExecute(result: Drawable?) {

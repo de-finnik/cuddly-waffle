@@ -3,6 +3,7 @@ package de.finnik.music
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.os.Environment
 import java.io.File
 import java.io.FileInputStream
@@ -33,5 +34,25 @@ class ThumbnailStore(application: Application) {
         val file = File(dir, id)
         val fin = FileInputStream(file)
         return BitmapFactory.decodeStream(fin)
+    }
+}
+class Utils {
+    companion object {
+        fun averageColor(bitmap: Bitmap): Int {
+            var red: Int = 0
+            var green: Int = 0
+            var blue: Int = 0
+            var count: Int = 0
+            for(x in 0 until bitmap.width) {
+                for(y in 0 until bitmap.height) {
+                    var color = bitmap.getPixel(x, y)
+                    count++
+                    red+=Color.red(color)
+                    green+=Color.green(color)
+                    blue+=Color.blue(color)
+                }
+            }
+            return Color.rgb(red/count, green/count, blue/count)
+        }
     }
 }
