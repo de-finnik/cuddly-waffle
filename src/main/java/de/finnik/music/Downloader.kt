@@ -8,8 +8,7 @@ import java.io.File
 
 class Downloader {
     fun download(id: String, dir: File) {
-        val url = "https://youtu.be/$id"
-        val request = YoutubeDLRequest(url)
+        val request = YoutubeDLRequest(id)
         request.setOption("-x")
         request.setOption("--audio-format", "opus")
         request.setOption("--write-info-json")

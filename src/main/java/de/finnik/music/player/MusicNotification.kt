@@ -16,14 +16,16 @@ import de.finnik.music.Song
 import de.finnik.music.Utils
 import java.io.File
 
-class MusicNotification(val context: Context, val song: Song) {
+class MusicNotification(val context: Context) {
     private val channelId = "CHANNEL_1"
     private lateinit var builder: NotificationCompat.Builder
     private val actionPlay: NotificationCompat.Action
     private val actionPause: NotificationCompat.Action
     private val actionNext: NotificationCompat.Action
     private val actionPrevious: NotificationCompat.Action
-    private val color = Utils.averageColor(song.thumbnail)
+
+    private val colors: HashMap<String, Int> = HashMap()
+
     init {
         actionPlay = NotificationCompat.Action(R.drawable.ic_play, "Play", pendingIntent(context, MusicPlayerService.ACTION_PLAY))
         actionPause = NotificationCompat.Action(R.drawable.ic_pause, "Pause", pendingIntent(context, MusicPlayerService.ACTION_PAUSE))
@@ -33,7 +35,10 @@ class MusicNotification(val context: Context, val song: Song) {
         createNotificationChannel(context)
     }
 
-    private fun setupBuilder(action: NotificationCompat.Action) {
+    private fun setupBuilder(song: Song, action: NotificationCompat.Action) {
+        if(colors.containsKey(song.videoInfo.id).not()) {
+            colors[song.id] = Utils.averageColor(song.thumbnail)
+        }
         builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_notifications_black_24dp)
             .setContentTitle(song.title)
@@ -42,17 +47,17 @@ class MusicNotification(val context: Context, val song: Song) {
             .addAction(actionPrevious)
             .addAction(action)
             .addAction(actionNext)
-            .setColor(color)
+            .setColor(colors[song.id]!!)
             .setStyle(androidx.media.app.NotificationCompat.MediaStyle().setShowActionsInCompactView(0,1,2))
     }
 
-    fun showPlay() {
-        setupBuilder(actionPlay)
+    fun showPlay(song: Song) {
+        setupBuilder(song, actionPlay)
         showNotification()
     }
 
-    fun showPause() {
-        setupBuilder(actionPause)
+    fun showPause(song: Song) {
+        setupBuilder(song, actionPause)
         builder.setOngoing(true)
         showNotification()
     }
@@ -73,8 +78,8 @@ class MusicNotification(val context: Context, val song: Song) {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "channel_name"
-            val descriptionText = "description"
+            val name = "Music Service"
+            val descriptionText = "Shows the notification to control the music service"
             val importance = NotificationManager.IMPORTANCE_DEFAULT
             val channel = NotificationChannel(channelId, name, importance).apply {
                 description = descriptionText

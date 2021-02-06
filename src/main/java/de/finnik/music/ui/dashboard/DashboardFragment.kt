@@ -66,11 +66,6 @@ class DashboardFragment : Fragment() {
     }
 
     fun play(song: Song) {
-        musicNotification = MusicNotification(requireContext(), song)
-        musicNotification.showPause()
-        musicPlayerService.doOnPause(Consumer {
-            if (it) musicNotification.showPause() else musicNotification.showPlay()
-        })
         if (connectedToService) {
             musicPlayerService.play(song)
         }

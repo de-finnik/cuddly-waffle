@@ -39,12 +39,13 @@ class MainActivity : AppCompatActivity() {
         updateYoutubeDL()
         FFmpeg.getInstance().init(application, this)
 
-        File(application.filesDir, "audio").listFiles().forEach {
+        /**File(application.filesDir, "audio").listFiles().forEach {
             Log.i("TAG", "onCreate: filelist: ${it.absolutePath}")
         }
         val mediaMetadataRetriever = MediaMetadataRetriever()
         mediaMetadataRetriever.setDataSource("/data/user/0/de.finnik.music/files/audio/n4RjJKxsamQ.opus")
         Log.i("TAG", "onCreate: ${mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)}")
+         **/
     }
 
 

@@ -13,17 +13,20 @@ import java.util.function.Consumer
 
 class MusicPlayerService: Service() {
     lateinit var player: MediaPlayer
-    lateinit var songs: MutableList<Song>
-    var songPosn: Int = 0
     private val binder = MusicBinder()
+    private lateinit var notification: MusicNotification
+
+    private lateinit var currentSong: Song
 
     override fun onCreate() {
         super.onCreate()
         player = MediaPlayer()
+        notification = MusicNotification(applicationContext)
     }
 
     fun play(song: Song) {
-        val myUri: Uri = Uri.fromFile(song.audio)
+        currentSong = song
+        val myUri: Uri = Uri.fromFile(currentSong.audio)
         player.apply {
             reset()
             setAudioAttributes(
@@ -36,27 +39,20 @@ class MusicPlayerService: Service() {
             prepare()
             start()
         }
-    }
-
-    lateinit var consumer: Consumer<Boolean>
-
-    fun doOnPause(consumer: Consumer<Boolean>) {
-        this.consumer = consumer
+        notification.showPause(currentSong)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.action
 
-        Log.i("TAG", "onStartCommand: $action")
         when (action) {
             ACTION_PLAY -> {
                 player.start()
-                consumer.accept(player.isPlaying)
+                notification.showPause(currentSong)
             }
             ACTION_PAUSE -> {
                 player.pause()
-                Log.i("TAG", "onStartCommand: ${player.isPlaying}")
-                consumer.accept(player.isPlaying)
+                notification.showPlay(currentSong)
             }
         }
         return super.onStartCommand(intent, flags, startId)
