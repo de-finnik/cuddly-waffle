@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.bawaviki.youtubedl_android.YoutubeDL
 import com.bawaviki.youtubedl_android.mapper.VideoInfo
+import de.finnik.music.DownloadTask
 import de.finnik.music.Downloader
 import de.finnik.music.R
 import de.finnik.music.ThumbnailStore
@@ -50,7 +51,7 @@ class HomeFragment : Fragment() {
         val list_video_info = root.findViewById<ListView>(R.id.list_result)
         list_video_info.adapter = adapter
         list_video_info.setOnItemClickListener { adapterView: AdapterView<*>, view1: View, i: Int, l: Long ->
-            Downloader().download(adapter.getItem(i)!!.id, File(requireActivity().application.filesDir, "audio"))
+            DownloadTask().download(adapter.getItem(i)!!.id, File(requireActivity().application.filesDir, "audio"))
             val stream = Stream(requireContext(), adapter.getItem(i)!!)
             stream.show(view1)
         }

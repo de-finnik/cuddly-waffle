@@ -1,10 +1,14 @@
 package de.finnik.music
 
+import android.content.Context
+import android.os.AsyncTask
 import android.util.Log
+import android.widget.Toast
 import com.bawaviki.ffmpeg.FFmpeg
 import com.bawaviki.youtubedl_android.YoutubeDL
 import com.bawaviki.youtubedl_android.YoutubeDLRequest
 import java.io.File
+import java.util.concurrent.Executors
 
 class Downloader {
     fun download(id: String, dir: File) {
@@ -18,5 +22,13 @@ class Downloader {
         request.setOption("-o", dir.absolutePath +"/%(id)s.%(ext)s")
         val response = YoutubeDL.getInstance().execute(request)
         Log.i("TAG", "download: $response")
+    }
+}
+
+class DownloadTask {
+    fun download(id: String, dir: File) {
+        Executors.newSingleThreadExecutor().execute {
+            Downloader().download(id, dir)
+        }
     }
 }
