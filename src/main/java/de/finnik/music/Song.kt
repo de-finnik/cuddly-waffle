@@ -2,15 +2,12 @@ package de.finnik.music
 
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
-import android.util.Log
 import com.bawaviki.youtubedl_android.mapper.VideoInfo
-import com.bawaviki.youtubedl_android.mapper.VideoThumbnail
 import com.bawaviki.youtubedl_android.utils.YoutubeDLUtils
 import java.io.File
 import java.lang.Exception
-import java.lang.IllegalStateException
 
-class Song(val id: String, dir: File) {
+class Song(val id: String, private val dir: File) {
     val title: String
         get() {
             try {
@@ -34,7 +31,10 @@ class Song(val id: String, dir: File) {
             "$id.webp"
         ).absolutePath
     ) else BitmapFactory.decodeFile(File(dir, "$id.jpg").absolutePath)
-    val audio = File(dir, "$id.opus")
+    val audio: File
+        get() {
+            return AUDIO_FORMATS.map { File(dir, "$id.$it") }.filter {it.exists()}.first()
+        }
 
     private fun retrieveMetadata(keyCode: Int): String {
         val retriever = MediaMetadataRetriever()
@@ -45,7 +45,7 @@ class Song(val id: String, dir: File) {
     companion object {
         fun findSongs(dir: File): List<Song> {
             return dir.listFiles()
-                .filter { it.extension == "opus" }
+                .filter { AUDIO_FORMATS.contains(it.extension) }
                 .filter { File(dir, "${it.nameWithoutExtension}.info.json").exists() }
                 .filter {
                     File(dir, "${it.nameWithoutExtension}.webp").exists() || File(
@@ -56,5 +56,7 @@ class Song(val id: String, dir: File) {
                 .map { Song(it.nameWithoutExtension, dir) }
 
         }
+
+        val AUDIO_FORMATS = arrayOf("aac", "flac", "mp3", "m4a", "opus", "vorbis", "wav")
     }
 }
