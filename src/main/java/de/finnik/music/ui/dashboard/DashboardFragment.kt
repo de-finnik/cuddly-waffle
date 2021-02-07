@@ -13,10 +13,13 @@ import android.view.ViewGroup
 import android.widget.ListView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import de.finnik.music.MainActivity
 import de.finnik.music.R
 import de.finnik.music.Song
 import de.finnik.music.player.MusicNotification
 import de.finnik.music.player.MusicPlayerService
+import de.finnik.music.player.MusicPlayerView
+import de.finnik.music.ui.player.PlayerActivity
 import java.io.File
 import java.util.function.Consumer
 
@@ -29,7 +32,6 @@ class DashboardFragment : Fragment() {
 
     private var connectedToService = false
     private lateinit var musicPlayerService: MusicPlayerService
-    private lateinit var musicNotification: MusicNotification
 
     private val serviceConnection = object:ServiceConnection {
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -39,8 +41,8 @@ class DashboardFragment : Fragment() {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             connectedToService = true
             musicPlayerService = (service as MusicPlayerService.MusicBinder).service
+            (requireActivity() as MainActivity).musicPlayerView.setService(musicPlayerService)
         }
-
     }
 
     override fun onCreateView(
@@ -57,6 +59,10 @@ class DashboardFragment : Fragment() {
         loadSongs()
         list_download.setOnItemClickListener { parent, view, position, id ->
                 play(adapter.getItem(position)!!)
+        }
+
+        if(connectedToService) {
+            (requireActivity() as MainActivity).musicPlayerView.setService(musicPlayerService)
         }
 
         Intent(requireActivity(), MusicPlayerService::class.java).also { intent ->

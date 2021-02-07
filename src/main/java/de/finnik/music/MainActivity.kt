@@ -1,26 +1,31 @@
 package de.finnik.music
 
-import android.media.MediaMetadataRetriever
+import android.content.Intent
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.bawaviki.ffmpeg.FFmpeg
 import com.bawaviki.youtubedl_android.YoutubeDL
-import com.bawaviki.youtubedl_android.YoutubeDLRequest
-import com.bawaviki.youtubedl_android.YoutubeDLResponse
 import com.bawaviki.youtubedl_android.YoutubeDLUpdater.UpdateStatus
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import de.finnik.music.player.MusicPlayerView
+import de.finnik.music.ui.player.PlayerActivity
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import java.io.File
+import java.io.*
 
 class MainActivity : AppCompatActivity() {
+
+    lateinit var musicPlayerView: MusicPlayerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,18 +40,22 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
+        musicPlayerView = findViewById(R.id.music_player_view)
+        musicPlayerView.setOnClickListener {
+            val intent = Intent(this, PlayerActivity().javaClass)
+            startActivity(intent)
+            overridePendingTransition(R.anim.bottom_up, R.anim.nothing)
+        }
+
 
         updateYoutubeDL()
         FFmpeg.getInstance().init(application, this)
 
-        /**File(application.filesDir, "audio").listFiles().forEach {
+        File(application.filesDir, "audio").listFiles().forEach {
             Log.i("TAG", "onCreate: filelist: ${it.absolutePath}")
         }
-        val mediaMetadataRetriever = MediaMetadataRetriever()
-        mediaMetadataRetriever.setDataSource("/data/user/0/de.finnik.music/files/audio/n4RjJKxsamQ.opus")
-        Log.i("TAG", "onCreate: ${mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)}")
-         **/
     }
+
 
 
     private fun updateYoutubeDL() {
@@ -77,6 +86,9 @@ class MainActivity : AppCompatActivity() {
                         ).show()
                     }
                 }) { e: Throwable? ->
+                    throw RuntimeException(e)
+                    e?.printStackTrace()
+                    Log.e("TAG", "updateYoutubeDL: ${e?.message}", e)
                     Toast.makeText(this@MainActivity, "download failed", Toast.LENGTH_LONG).show()
                 }
     }

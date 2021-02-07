@@ -2,8 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="de.finnik.music">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -13,6 +15,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Music">
         <activity
+            android:name=".ui.player.PlayerActivity"
+            android:parentActivityName=".MainActivity" />
+        <activity
             android:name=".MainActivity"
             android:label="@string/app_name">
             <intent-filter>
@@ -21,30 +26,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver
-            android:name="com.arges.sepan.argmusicplayer.ArgNotificationReceiver"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.arges.intent.PLAYPAUSE" />
-                <action android:name="com.arges.intent.NEXT" />
-                <action android:name="com.arges.intent.PREV" />
-                <action android:name="com.arges.intent.HOME" />
-                <action android:name="com.arges.intent.CLOSE" />
-            </intent-filter>
-        </receiver>
-        <service android:name="com.arges.sepan.argmusicplayer.ArgMusicService"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="android.permission.INTERNET">
-            <intent-filter>
-                <action android:name="com.arges.intent.service.PLAYPAUSE"/>
-                <action android:name="com.arges.intent.service.NEXT"/>
-                <action android:name="com.arges.intent.service.PREV"/>
-                <action android:name="com.arges.intent.service.STOP"/>
-            </intent-filter>
-        </service>
-        <service android:name="de.finnik.music.MediaPlayerService" />
+
+        <service android:name=".MediaPlayerService" />
         <service android:name=".player.MusicPlayerService">
             <intent-filter>
                 <action android:name="de.finnik.music.ACTION_PLAY" />
