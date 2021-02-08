@@ -7,18 +7,19 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.bawaviki.youtubedl_android.mapper.PlaylistInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.orhanobut.logger.AndroidLogAdapter;
-import com.orhanobut.logger.Logger;
 import com.bawaviki.youtubedl_android.mapper.VideoInfo;
 import com.bawaviki.youtubedl_android.utils.StreamGobbler;
 import com.bawaviki.youtubedl_android.utils.StreamProcessExtractor;
 import com.bawaviki.youtubedl_android.utils.YoutubeDLUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.orhanobut.logger.AndroidLogAdapter;
+import com.orhanobut.logger.Logger;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -61,20 +62,20 @@ public class YoutubeDL {
 
     protected static final ObjectMapper objectMapper = new ObjectMapper();
 
-    private YoutubeDL(){
+    private YoutubeDL() {
     }
 
     public static YoutubeDL getInstance() {
         return INSTANCE;
     }
 
-    synchronized public void init(Application application,Context context) throws YoutubeDLException {
+    synchronized public void init(Application application, Context context) throws YoutubeDLException {
         if (initialized) return;
 
         initLogger();
 
         File baseDir = new File(application.getFilesDir(), baseName);
-        if(!baseDir.exists()) baseDir.mkdir();
+        if (!baseDir.exists()) baseDir.mkdir();
 
         packagesDir = new File(baseDir, packagesRoot);
         binDir = new File(packagesDir, "usr/bin");
@@ -86,8 +87,8 @@ public class YoutubeDL {
         ENV_LD_LIBRARY_PATH = packagesDir.getAbsolutePath() + "/usr/lib";
         ENV_SSL_CERT_FILE = packagesDir.getAbsolutePath() + "/usr/etc/tls/cert.pem";
 
-        app=application;
-        initPython(application, packagesDir,context);
+        app = application;
+        initPython(application, packagesDir, context);
         initYoutubeDL(application, youtubeDLDir);
 
         initialized = true;
@@ -105,17 +106,16 @@ public class YoutubeDL {
         }
     }
 
-    protected void initPython(Application application, File packagesDir,Context context) throws YoutubeDLException {
+    protected void initPython(Application application, File packagesDir, Context context) throws YoutubeDLException {
 
-        initAlertBox(context,application);
+        initAlertBox(context, application);
 
-        if(!pythonIsAvailable(application)){
+        if (!pythonIsAvailable(application)) {
             alert.show();
         }
 
 
-
-        }
+    }
 
 
     private void initLogger() {
@@ -148,7 +148,7 @@ public class YoutubeDL {
     }
 
     public List<VideoInfo> getYoutubeSearchInfo(String search, int count) throws YoutubeDLException, InterruptedException {
-        YoutubeDLRequest request = new YoutubeDLRequest("ytsearch"+count+":"+search);
+        YoutubeDLRequest request = new YoutubeDLRequest("ytsearch" + count + ":" + search);
         request.setOption("--dump-json");
         YoutubeDLResponse response = execute(request, null);
 
@@ -157,7 +157,7 @@ public class YoutubeDL {
         try {
             String[] json = response.getOut().split("\n");
             for (String s : json) {
-               infos.add(objectMapper.readValue(s, VideoInfo.class));
+                infos.add(objectMapper.readValue(s, VideoInfo.class));
             }
         } catch (IOException e) {
             throw new YoutubeDLException("Unable to parse video information", e);
@@ -206,7 +206,7 @@ public class YoutubeDL {
         Map<String, String> env = processBuilder.environment();
         env.put("LD_LIBRARY_PATH", ENV_LD_LIBRARY_PATH);
         env.put("SSL_CERT_FILE", ENV_SSL_CERT_FILE);
-        env.put("PATH",  System.getenv("PATH") + ":" + binDir.getAbsolutePath());
+        env.put("PATH", System.getenv("PATH") + ":" + binDir.getAbsolutePath());
 
         try {
             process = processBuilder.start();
@@ -233,8 +233,8 @@ public class YoutubeDL {
         String err = errBuffer.toString();
 
         if (exitCode > 0) {
-            Log.i("TAG", "execute: "+out);
-            Log.i("TAG", "execute: "+exitCode);
+            Log.i("TAG", "execute: " + out);
+            Log.i("TAG", "execute: " + exitCode);
             throw new YoutubeDLException(err);
         }
 
@@ -253,17 +253,17 @@ public class YoutubeDL {
         }
     }
 
-    private Boolean pythonIsAvailable(Application application){
+    private Boolean pythonIsAvailable(Application application) {
         SharedPreferences pref = application.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE);
         String oldVersion = pref.getString(isPython, null);
-        if("true".equals(oldVersion) && pythonPath.exists() ){
+        if ("true".equals(oldVersion) && pythonPath.exists()) {
             return true;
-        }else
+        } else
             return false;
     }
 
-    private void initAlertBox(Context context, final Application application){
-        alert=new AlertDialog.Builder(context);
+    private void initAlertBox(Context context, final Application application) {
+        alert = new AlertDialog.Builder(context);
         alert.setTitle("Download Python");
         alert.setMessage("Python binary is needed by this application.");
         alert.setCancelable(false);
@@ -276,8 +276,8 @@ public class YoutubeDL {
         });
     }
 
-    private void initProcessDialog(Context context){
-        progressDialog=new ProgressDialog(context);
+    private void initProcessDialog(Context context) {
+        progressDialog = new ProgressDialog(context);
         progressDialog.setCancelable(false);
         progressDialog.setTitle("Downloading");
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -285,7 +285,7 @@ public class YoutubeDL {
 
     @NonNull
     private static File download(Application application, String urls) throws YoutubeDLException, IOException {
-         int count;
+        int count;
         try {
             URL url = new URL(urls);
             URLConnection conection = url.openConnection();
@@ -329,7 +329,7 @@ public class YoutubeDL {
             Log.e("Error: ", e.getMessage());
         }
 
-        return new File(application.getCacheDir()+"/python_arm.zip");
+        return new File(application.getCacheDir() + "/python_arm.zip");
     }
 
     private static void updateSharedPrefs(Application application, String tag) throws YoutubeDLException {
@@ -340,7 +340,7 @@ public class YoutubeDL {
     }
 
 
-    static class  InstallPython extends AsyncTask <Application,Integer,Boolean> {
+    static class InstallPython extends AsyncTask<Application, Integer, Boolean> {
 
         @Override
         protected void onPreExecute() {
@@ -355,7 +355,7 @@ public class YoutubeDL {
                     packagesDir.mkdirs();
                 }
                 try {
-                    YoutubeDLUtils.unzip(download(applications[0],releasesUrl), packagesDir);
+                    YoutubeDLUtils.unzip(download(applications[0], releasesUrl), packagesDir);
                 } catch (IOException e) {
                     // delete for recovery later
                     YoutubeDLUtils.delete(pythonPath);
@@ -376,7 +376,7 @@ public class YoutubeDL {
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
             try {
-                updateSharedPrefs(app,aBoolean.toString());
+                updateSharedPrefs(app, aBoolean.toString());
             } catch (YoutubeDLException e) {
                 e.printStackTrace();
             }
