@@ -1,24 +1,15 @@
 package de.finnik.music.ui.dashboard
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
-import android.os.AsyncTask
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
-import com.bawaviki.youtubedl_android.mapper.VideoInfo
 import de.finnik.music.R
-import de.finnik.music.Song
-import de.finnik.music.ThumbnailStore
-import java.io.File
-import java.io.InputStream
-import java.net.URL
+import de.finnik.music.songs.Song
 
 class SongAdapter(context: Context, resource: Int, objects: List<Song>): ArrayAdapter<Song>(context, resource, objects){
     private val mContext: Context?

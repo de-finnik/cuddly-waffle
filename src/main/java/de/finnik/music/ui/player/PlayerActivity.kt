@@ -75,6 +75,8 @@ class PlayerActivity : Activity() {
                 musicPlayerService.ACTION_PLAY()
             }
         }
+        iv_next.setOnClickListener { musicPlayerService.ACTION_NEXT() }
+        iv_previous.setOnClickListener { musicPlayerService.ACTION_PREVIOUS() }
 
         iv_close.setOnClickListener {
             finish()

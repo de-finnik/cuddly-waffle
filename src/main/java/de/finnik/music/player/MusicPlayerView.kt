@@ -1,21 +1,14 @@
 package de.finnik.music.player
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
-import android.media.Image
 import android.util.AttributeSet
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import de.finnik.music.R
-import de.finnik.music.Song
+import de.finnik.music.songs.Song
 import java.util.function.Consumer
 
 class MusicPlayerView(context: Context, attributeSet: AttributeSet) :
@@ -62,6 +55,8 @@ class MusicPlayerView(context: Context, attributeSet: AttributeSet) :
             else
                 musicPlayerService.ACTION_PLAY()
         }
+        iv_previous.setOnClickListener { musicPlayerService.ACTION_PREVIOUS() }
+        iv_next.setOnClickListener { musicPlayerService.ACTION_NEXT() }
     }
 
     private fun displaySong(song: Song) {

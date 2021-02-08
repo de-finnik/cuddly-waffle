@@ -10,14 +10,16 @@ import android.os.Handler
 import android.os.IBinder
 import android.util.Log
 import android.widget.SeekBar
-import de.finnik.music.Song
+import de.finnik.music.songs.Song
 import java.util.function.Consumer
 
 class MusicPlayerService: Service() {
     lateinit var player: MediaPlayer
     private val binder = MusicBinder()
 
-    private lateinit var currentSong: Song
+    private lateinit var songList: List<Song>
+    private var index: Int = 0
+    private val currentSong: Song get() = songList.get(index)
 
     private val onSongChange: SongListener = SongListener()
     private val onPause: SongListener = SongListener()
@@ -85,6 +87,7 @@ class MusicPlayerService: Service() {
         })
         addPauseListener(Consumer { player.pause() })
         addPlayListener(Consumer { player.start() })
+        player.setOnCompletionListener { ACTION_NEXT() }
     }
 
     private fun initNotification() {
@@ -113,8 +116,9 @@ class MusicPlayerService: Service() {
         onPlay.add(consumer)
     }
 
-    fun play(song: Song) {
-        currentSong = song
+    fun play(songList: List<Song>, index: Int) {
+        this.songList = songList
+        this.index = index
 
         songChange()
     }
@@ -133,6 +137,8 @@ class MusicPlayerService: Service() {
         when (action) {
             ACTION_PLAY -> ACTION_PLAY()
             ACTION_PAUSE -> ACTION_PAUSE()
+            ACTION_PREVIOUS -> ACTION_PREVIOUS()
+            ACTION_NEXT -> ACTION_NEXT()
         }
         return super.onStartCommand(intent, flags, startId)
     }
@@ -145,6 +151,18 @@ class MusicPlayerService: Service() {
         onPause.call(currentSong)
     }
 
+    fun ACTION_PREVIOUS() {
+        if(--index < 0)
+            index = songList.size - 1
+        songChange()
+    }
+
+    fun ACTION_NEXT() {
+        if(++index >= songList.size)
+            index = 0
+        songChange()
+    }
+
     override fun onBind(intent: Intent?): IBinder? {
         return binder
     }
@@ -152,8 +170,6 @@ class MusicPlayerService: Service() {
     inner class MusicBinder : Binder() {
         val service: MusicPlayerService
             get() = this@MusicPlayerService
-
-
     }
 
     companion object {

@@ -32,6 +32,8 @@
             <intent-filter>
                 <action android:name="de.finnik.music.ACTION_PLAY" />
                 <action android:name="de.finnik.music.ACTION_PAUSE" />
+                <action android:name="de.finnik.music.ACTION_PREVIOUS" />
+                <action android:name="de.finnik.music.ACTION_NEXT" />
             </intent-filter>
         </service>
     </application>

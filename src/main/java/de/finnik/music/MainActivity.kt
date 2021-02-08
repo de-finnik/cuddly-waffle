@@ -2,6 +2,7 @@ package de.finnik.music
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -11,15 +12,21 @@ import com.bawaviki.ffmpeg.FFmpeg
 import com.bawaviki.youtubedl_android.YoutubeDL
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import de.finnik.music.player.MusicPlayerView
+import de.finnik.music.songs.Song
+import de.finnik.music.songs.SongList
 import de.finnik.music.ui.player.PlayerActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
     lateinit var musicPlayerView: MusicPlayerView
+    val songs: SongList = SongList()
+
+    lateinit var audio_dir: File
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,13 +48,22 @@ class MainActivity : AppCompatActivity() {
             overridePendingTransition(R.anim.bottom_up, R.anim.nothing)
         }
 
-
         updateYoutubeDL()
         FFmpeg.getInstance().init(application, this)
 
-        /**File(application.filesDir, "audio").listFiles().forEach {
+        audio_dir = File(application.filesDir, "audio")
+        audio_dir.mkdirs()
+
+        loadSongs()
+
+        File(application.filesDir, "audio").listFiles().forEach {
             Log.i("TAG", "onCreate: filelist: ${it.absolutePath}")
-        }**/
+        }
+    }
+
+    fun loadSongs() {
+        songs.clear()
+        songs.addAll(Song.findSongs(audio_dir))
     }
 
     fun updateYoutubeDL() {

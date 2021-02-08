@@ -15,11 +15,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import de.finnik.music.MainActivity
 import de.finnik.music.R
-import de.finnik.music.Song
-import de.finnik.music.player.MusicNotification
+import de.finnik.music.songs.Song
 import de.finnik.music.player.MusicPlayerService
-import de.finnik.music.player.MusicPlayerView
-import de.finnik.music.ui.player.PlayerActivity
 import java.io.File
 import java.util.function.Consumer
 
@@ -56,13 +53,21 @@ class DashboardFragment : Fragment() {
         adapter = SongAdapter(requireContext(), R.layout.list_adapter, songList)
         val list_download = root.findViewById<ListView>(R.id.list_download)
         list_download.adapter = adapter
-        loadSongs()
+
+        val mainActivity = requireActivity() as MainActivity
+
+        mainActivity.songs.addListener(Consumer {
+            songList.clear()
+            songList.addAll(it)
+            adapter.notifyDataSetChanged()
+        })
+
         list_download.setOnItemClickListener { parent, view, position, id ->
-                play(adapter.getItem(position)!!)
+                play(position)
         }
 
         if(connectedToService) {
-            (requireActivity() as MainActivity).musicPlayerView.setService(musicPlayerService)
+            mainActivity.musicPlayerView.setService(musicPlayerService)
         }
 
         Intent(requireActivity(), MusicPlayerService::class.java).also { intent ->
@@ -71,17 +76,10 @@ class DashboardFragment : Fragment() {
         return root
     }
 
-    fun play(song: Song) {
+    fun play(index: Int) {
         if (connectedToService) {
-            musicPlayerService.play(song)
+            musicPlayerService.play((requireActivity() as MainActivity).songs, index)
         }
-   }
-
-    fun loadSongs() {
-        val dir = File(requireActivity().application.filesDir, "audio")
-        dir.mkdirs()
-        songList.clear()
-        songList.addAll(Song.findSongs(dir))
-        adapter.notifyDataSetChanged()
     }
+
 }
