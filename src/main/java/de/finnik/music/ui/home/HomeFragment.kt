@@ -1,9 +1,7 @@
 package de.finnik.music.ui.home
 
-import android.media.MediaMetadataRetriever
 import android.os.AsyncTask
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -11,12 +9,12 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.bawaviki.youtubedl_android.DownloadProgressCallback
 import com.bawaviki.youtubedl_android.YoutubeDL
 import com.bawaviki.youtubedl_android.mapper.VideoInfo
-import de.finnik.music.DownloadTask
-import de.finnik.music.Downloader
+import de.finnik.music.download.DownloadTask
 import de.finnik.music.R
-import de.finnik.music.ThumbnailStore
+import de.finnik.music.download.DownloadNotification
 import de.finnik.music.ui.ProgressDialog
 import de.finnik.music.ui.Stream
 import java.io.File
@@ -52,8 +50,11 @@ class HomeFragment : Fragment() {
         val list_video_info = root.findViewById<ListView>(R.id.list_result)
         list_video_info.adapter = adapter
         list_video_info.setOnItemClickListener { adapterView: AdapterView<*>, view1: View, i: Int, l: Long ->
-            DownloadTask().download(adapter.getItem(i)!!.id, File(requireActivity().application.filesDir, "audio"))
-            val stream = Stream(requireContext(), adapter.getItem(i)!!)
+            val info = adapter.getItem(i)!!
+            val notification = DownloadNotification(requireContext(), info)
+            DownloadTask()
+                .download(info.id, File(requireActivity().application.filesDir, "audio"), DownloadProgressCallback { progress, size, rate, etaInSeconds ->  notification.showProgress(progress.toInt())})
+            val stream = Stream(requireContext(), info)
             stream.show(view1)
         }
 
