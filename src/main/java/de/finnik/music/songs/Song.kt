@@ -43,6 +43,10 @@ class Song(val id: String, private val dir: File) {
         return retriever.extractMetadata(keyCode)
     }
 
+    override fun toString(): String {
+        return "$title - $artist"
+    }
+
     companion object {
         fun findSongs(dir: File): List<Song> {
             return dir.listFiles()

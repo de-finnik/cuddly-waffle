@@ -12,11 +12,11 @@ import androidx.lifecycle.ViewModelProvider
 import com.bawaviki.youtubedl_android.DownloadProgressCallback
 import com.bawaviki.youtubedl_android.YoutubeDL
 import com.bawaviki.youtubedl_android.mapper.VideoInfo
+import de.finnik.music.MainActivity
 import de.finnik.music.download.DownloadTask
 import de.finnik.music.R
 import de.finnik.music.download.DownloadNotification
 import de.finnik.music.ui.ProgressDialog
-import de.finnik.music.ui.Stream
 import java.io.File
 import java.lang.ref.WeakReference
 import kotlin.collections.ArrayList
@@ -52,10 +52,12 @@ class HomeFragment : Fragment() {
         list_video_info.setOnItemClickListener { adapterView: AdapterView<*>, view1: View, i: Int, l: Long ->
             val info = adapter.getItem(i)!!
             val notification = DownloadNotification(requireContext(), info)
-            DownloadTask()
-                .download(info.id, File(requireActivity().application.filesDir, "audio"), DownloadProgressCallback { progress, size, rate, etaInSeconds ->  notification.showProgress(progress.toInt())})
-            val stream = Stream(requireContext(), info)
-            stream.show(view1)
+            DownloadTask.download(info.id, File(requireActivity().application.filesDir, "audio"), DownloadProgressCallback { progress, size, rate, etaInSeconds ->  notification.showProgress(progress.toInt())})
+                .execute {
+                    (activity as MainActivity).loadSongs()
+                }
+            /**val stream = Stream(requireContext(), info)
+            stream.show(view1)*/
         }
 
         return root

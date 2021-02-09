@@ -1,5 +1,6 @@
 package de.finnik.music.songs
 
+import android.util.Log
 import java.util.function.Consumer
 import java.util.function.UnaryOperator
 
@@ -10,33 +11,37 @@ open class ObservableList<T>:ArrayList<T>() {
 
 
     override fun add(element: T): Boolean {
+        val boolean = super.add(element)
         change()
-        return super.add(element)
+        return boolean
     }
 
     override fun add(index: Int, element: T) {
-        change()
         super.add(index, element)
+        change()
     }
 
     override fun addAll(elements: Collection<T>): Boolean {
+        val addAll = super.addAll(elements)
         change()
-        return super.addAll(elements)
+        return addAll
     }
 
     override fun addAll(index: Int, elements: Collection<T>): Boolean {
+        val addAll = super.addAll(index, elements)
         change()
-        return super.addAll(index, elements)
+        return addAll
     }
 
     override fun clear() {
-        change()
         super.clear()
+        change()
     }
 
     override fun remove(element: T): Boolean {
+        val remove = super.remove(element)
         change()
-        return super.remove(element)
+        return remove
     }
 
     private fun change() {
@@ -45,6 +50,5 @@ open class ObservableList<T>:ArrayList<T>() {
 
     fun addListener(listener: Consumer<ObservableList<T>>) {
         listeners.add(listener)
-        listener.accept(this)
     }
 }

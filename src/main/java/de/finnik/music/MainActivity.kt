@@ -3,14 +3,19 @@ package de.finnik.music
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.GestureDetector
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.bawaviki.ffmpeg.FFmpeg
+import com.bawaviki.youtubedl_android.DownloadProgressCallback
 import com.bawaviki.youtubedl_android.YoutubeDL
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import de.finnik.music.download.DownloadNotification
+import de.finnik.music.download.DownloadTask
+import de.finnik.music.download.Downloader
 import de.finnik.music.player.MusicPlayerView
 import de.finnik.music.songs.Song
 import de.finnik.music.songs.SongList
@@ -20,6 +25,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.function.Consumer
 
 class MainActivity : AppCompatActivity() {
 
@@ -31,6 +37,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
 
         val navController = findNavController(R.id.nav_host_fragment)
@@ -47,12 +55,22 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
             overridePendingTransition(R.anim.bottom_up, R.anim.nothing)
         }
+        GestureDetector.SimpleOnGestureListener()
 
         updateYoutubeDL()
         FFmpeg.getInstance().init(application, this)
 
         audio_dir = File(application.filesDir, "audio")
         audio_dir.mkdirs()
+
+        if (intent.action == "android.intent.action.SEND") {
+            val url = intent.extras?.get(Intent.EXTRA_TEXT) as String
+            DownloadTask.download(url, audio_dir, DownloadProgressCallback { progress, size, rate, etaInSeconds ->  })
+                .execute {
+                    loadSongs()
+                }
+        }
+
 
         loadSongs()
 

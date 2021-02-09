@@ -17,15 +17,15 @@ import de.finnik.music.MainActivity
 import de.finnik.music.R
 import de.finnik.music.songs.Song
 import de.finnik.music.player.MusicPlayerService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.function.Consumer
 
-private val songList: MutableList<Song> = ArrayList()
 
 class DashboardFragment : Fragment() {
 
     private lateinit var dashboardViewModel: DashboardViewModel
-    private lateinit var adapter: SongAdapter
 
     private var connectedToService = false
     private lateinit var musicPlayerService: MusicPlayerService
@@ -42,6 +42,10 @@ class DashboardFragment : Fragment() {
         }
     }
 
+    companion object {
+        private lateinit var adapter: SongAdapter
+    }
+
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
@@ -50,16 +54,16 @@ class DashboardFragment : Fragment() {
         dashboardViewModel =
                 ViewModelProvider(this).get(DashboardViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_dashboard, container, false)
-        adapter = SongAdapter(requireContext(), R.layout.list_adapter, songList)
+        val mainActivity = requireActivity() as MainActivity
+        adapter = SongAdapter(requireContext(), R.layout.list_adapter, mainActivity.songs)
         val list_download = root.findViewById<ListView>(R.id.list_download)
         list_download.adapter = adapter
 
-        val mainActivity = requireActivity() as MainActivity
 
         mainActivity.songs.addListener(Consumer {
-            songList.clear()
-            songList.addAll(it)
-            adapter.notifyDataSetChanged()
+            requireActivity().runOnUiThread {
+                adapter.notifyDataSetChanged()
+            }
         })
 
         list_download.setOnItemClickListener { parent, view, position, id ->
