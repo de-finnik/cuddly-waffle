@@ -8,18 +8,18 @@ import android.net.Uri
 import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
-import android.util.Log
 import android.widget.SeekBar
+import de.finnik.music.songs.Playlist
 import de.finnik.music.songs.Song
+import de.finnik.music.songs.SongPlayer
+import java.io.File
 import java.util.function.Consumer
 
 class MusicPlayerService: Service() {
     lateinit var player: MediaPlayer
     private val binder = MusicBinder()
 
-    private lateinit var songList: List<Song>
-    private var index: Int = 0
-    private val currentSong: Song get() = songList.get(index)
+    private lateinit var songPlayer: SongPlayer
 
     private val onSongChange: SongListener = SongListener()
     private val onPause: SongListener = SongListener()
@@ -36,18 +36,27 @@ class MusicPlayerService: Service() {
         initSeekbars()
     }
 
+    fun initSongPlayer(songs: List<Song>, playlist: Playlist) {
+        songPlayer = SongPlayer(songs, playlist)
+    }
+
+    fun setPlaylist(playlist: Playlist) {
+        songPlayer.playlist = playlist
+    }
+
     private fun initSeekbars() {
         val handler = Handler()
         val onSeekBarChangeListener = object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if(fromUser) {
+                if (fromUser) {
                     player.seekTo(progress * 1000)
                 }
             }
+
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         }
-        val updateSeekBar = object: Runnable {
+        val updateSeekBar = object : Runnable {
             override fun run() {
                 seekBars.forEach {
                     it.max = player.duration / 1000
@@ -71,7 +80,7 @@ class MusicPlayerService: Service() {
     private fun initPlayer() {
         player = MediaPlayer()
         addSongChangeListener(Consumer {
-            val myUri: Uri = Uri.fromFile(currentSong.audio)
+            val myUri: Uri = Uri.fromFile(songPlayer.getCurrentSong().audio)
             player.apply {
                 reset()
                 setAudioAttributes(
@@ -103,8 +112,8 @@ class MusicPlayerService: Service() {
 
     fun addSongChangeListener(consumer: Consumer<Song>) {
         onSongChange.add(consumer)
-        if(isPlaying()) {
-            consumer.accept(currentSong)
+        if (isPlaying()) {
+            consumer.accept(songPlayer.getCurrentSong())
         }
     }
 
@@ -116,9 +125,8 @@ class MusicPlayerService: Service() {
         onPlay.add(consumer)
     }
 
-    fun play(songList: List<Song>, index: Int) {
-        this.songList = songList
-        this.index = index
+    fun play(index: Int) {
+        songPlayer.play(index)
 
         songChange()
     }
@@ -128,7 +136,7 @@ class MusicPlayerService: Service() {
     }
 
     private fun songChange() {
-        onSongChange.call(currentSong)
+        onSongChange.call(songPlayer.getCurrentSong())
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -144,22 +152,20 @@ class MusicPlayerService: Service() {
     }
 
     fun ACTION_PLAY() {
-        onPlay.call(currentSong)
+        onPlay.call(songPlayer.getCurrentSong())
     }
 
     fun ACTION_PAUSE() {
-        onPause.call(currentSong)
+        onPause.call(songPlayer.getCurrentSong())
     }
 
     fun ACTION_PREVIOUS() {
-        if(--index < 0)
-            index = songList.size - 1
+        songPlayer.previous()
         songChange()
     }
 
     fun ACTION_NEXT() {
-        if(++index >= songList.size)
-            index = 0
+        songPlayer.next()
         songChange()
     }
 
@@ -181,12 +187,15 @@ class MusicPlayerService: Service() {
 
     class SongListener {
         private val consumers: MutableList<Consumer<Song>>
+
         init {
             consumers = ArrayList()
         }
+
         fun add(consumer: Consumer<Song>) {
             consumers.add(consumer)
         }
+
         fun call(song: Song) {
             consumers.forEach { it.accept(song) }
         }

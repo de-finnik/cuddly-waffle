@@ -3,7 +3,6 @@ package de.finnik.music
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.GestureDetector
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -13,10 +12,10 @@ import com.bawaviki.ffmpeg.FFmpeg
 import com.bawaviki.youtubedl_android.DownloadProgressCallback
 import com.bawaviki.youtubedl_android.YoutubeDL
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import de.finnik.music.download.DownloadNotification
+import com.google.gson.Gson
 import de.finnik.music.download.DownloadTask
-import de.finnik.music.download.Downloader
 import de.finnik.music.player.MusicPlayerView
+import de.finnik.music.songs.Playlist
 import de.finnik.music.songs.Song
 import de.finnik.music.songs.SongList
 import de.finnik.music.ui.player.PlayerActivity
@@ -24,19 +23,25 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.BufferedWriter
 import java.io.File
-import java.util.function.Consumer
+import java.io.FileReader
+import java.io.FileWriter
 
 class MainActivity : AppCompatActivity() {
 
     lateinit var musicPlayerView: MusicPlayerView
     val songs: SongList = SongList()
+    var playlists: List<Playlist> = emptyList()
 
     lateinit var audio_dir: File
+    lateinit var playlist_dir: File
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        songs.clear()
 
 
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
@@ -44,8 +49,11 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        val appBarConfiguration = AppBarConfiguration(setOf(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications))
+        val appBarConfiguration = AppBarConfiguration(
+            setOf(
+                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications
+            )
+        )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
@@ -55,7 +63,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
             overridePendingTransition(R.anim.bottom_up, R.anim.nothing)
         }
-        GestureDetector.SimpleOnGestureListener()
 
         updateYoutubeDL()
         FFmpeg.getInstance().init(application, this)
@@ -63,16 +70,22 @@ class MainActivity : AppCompatActivity() {
         audio_dir = File(application.filesDir, "audio")
         audio_dir.mkdirs()
 
+        playlist_dir = File(application.filesDir, "playlist")
+        playlist_dir.mkdirs()
+
         if (intent.action == "android.intent.action.SEND") {
             val url = intent.extras?.get(Intent.EXTRA_TEXT) as String
-            DownloadTask.download(url, audio_dir, DownloadProgressCallback { progress, size, rate, etaInSeconds ->  })
+            DownloadTask.download(
+                url,
+                audio_dir,
+                DownloadProgressCallback { progress, size, rate, etaInSeconds -> })
                 .execute {
                     loadSongs()
                 }
         }
 
-
         loadSongs()
+        loadPlaylists()
 
         File(application.filesDir, "audio").listFiles().forEach {
             Log.i("TAG", "onCreate: filelist: ${it.absolutePath}")
@@ -82,6 +95,10 @@ class MainActivity : AppCompatActivity() {
     fun loadSongs() {
         songs.clear()
         songs.addAll(Song.findSongs(audio_dir))
+    }
+
+    fun loadPlaylists() {
+        playlists = listOf(Playlist(songs.getIds(), "All")).plus(Playlist.findPlaylists(playlist_dir))
     }
 
     fun updateYoutubeDL() {

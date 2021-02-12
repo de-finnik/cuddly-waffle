@@ -43,6 +43,7 @@
     </LinearLayout>
 
     <ImageView
+        android:id="@+id/iv_add_playlist"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_weight="0"

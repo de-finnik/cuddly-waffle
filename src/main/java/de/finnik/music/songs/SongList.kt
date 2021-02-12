@@ -1,12 +1,18 @@
 package de.finnik.music.songs
 
-import android.util.Log
 import java.util.function.Consumer
-import java.util.function.UnaryOperator
 
-class SongList: ObservableList<Song>()
+class SongList : ObservableList<Song>() {
+    fun getIds(): List<String> {
+        return map { it.id }
+    }
 
-open class ObservableList<T>:ArrayList<T>() {
+    fun getId(id: String): Song {
+        return filter { it.id == id }.first()
+    }
+}
+
+open class ObservableList<T> : ArrayList<T>() {
     private val listeners: MutableList<Consumer<ObservableList<T>>> = ArrayList()
 
 
