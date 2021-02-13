@@ -16,6 +16,7 @@ import com.google.gson.Gson
 import de.finnik.music.download.DownloadTask
 import de.finnik.music.player.MusicPlayerView
 import de.finnik.music.songs.Playlist
+import de.finnik.music.songs.PlaylistStore
 import de.finnik.music.songs.Song
 import de.finnik.music.songs.SongList
 import de.finnik.music.ui.player.PlayerActivity
@@ -32,7 +33,7 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var musicPlayerView: MusicPlayerView
     val songs: SongList = SongList()
-    var playlists: List<Playlist> = emptyList()
+    lateinit var playlistStore: PlaylistStore
 
     lateinit var audio_dir: File
     lateinit var playlist_dir: File
@@ -85,9 +86,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         loadSongs()
-        loadPlaylists()
+        playlistStore = PlaylistStore(Playlist(songs.map { it.id }.toMutableList(), getString(R.string.playlist_all)), playlist_dir)
 
-        File(application.filesDir, "audio").listFiles().forEach {
+        File(application.filesDir, "playlist").listFiles().forEach {
             Log.i("TAG", "onCreate: filelist: ${it.absolutePath}")
         }
     }
@@ -95,10 +96,6 @@ class MainActivity : AppCompatActivity() {
     fun loadSongs() {
         songs.clear()
         songs.addAll(Song.findSongs(audio_dir))
-    }
-
-    fun loadPlaylists() {
-        playlists = listOf(Playlist(songs.getIds(), "All")).plus(Playlist.findPlaylists(playlist_dir))
     }
 
     fun updateYoutubeDL() {

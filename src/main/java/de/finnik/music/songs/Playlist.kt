@@ -1,16 +1,27 @@
 package de.finnik.music.songs
 
-import android.util.Log
-import com.google.android.gms.common.util.Strings
 import com.google.gson.Gson
-import java.io.BufferedReader
+import java.io.BufferedWriter
 import java.io.File
 import java.io.FileReader
-import java.nio.Buffer
+import java.io.FileWriter
+import java.util.function.Consumer
 
-class Playlist(val ids: List<String>, val name: String) {
+class Playlist(val ids: MutableList<String>, val name: String) {
     operator fun get(index: Int): String {
         return ids[index]
+    }
+
+    fun add(id: String) {
+        if (ids.contains(id).not()) {
+            ids.add(id)
+        }
+    }
+
+    fun remove(id: String) {
+        if (ids.contains(id)) {
+            ids.remove(id)
+        }
     }
 
     fun size(): Int {
@@ -23,7 +34,7 @@ class Playlist(val ids: List<String>, val name: String) {
 
     override fun toString(): String {
         var string = "$name:"
-        ids.forEach {  string += " '$it'"}
+        ids.forEach { string += " '$it'" }
         return string
     }
 
@@ -33,11 +44,17 @@ class Playlist(val ids: List<String>, val name: String) {
                 Gson().fromJson(FileReader(it), Playlist::class.java)
             }
         }
+
+        fun storePlaylist(playlist: Playlist, dir: File) {
+            val writer = BufferedWriter(FileWriter(File(dir, playlist.name)))
+            writer.write(Gson().toJson(playlist))
+            writer.close()
+        }
     }
 }
 
 open class PlaylistPlayer {
-    open var playlist: Playlist = Playlist(listOf(), "")
+    open var playlist: Playlist = Playlist(mutableListOf(), "")
     protected var index = 0
         set(value) {
             var mod = value % playlist.size()
@@ -72,5 +89,64 @@ class SongPlayer(val songs: List<Song>, playlist: Playlist) : PlaylistPlayer() {
 
     fun getCurrentSong(): Song {
         return songs.filter { it.id == getCurrent() }.first()
+    }
+}
+
+class PlaylistStore(val playlist: Playlist, val dir: File) {
+    lateinit var playlists: List<Playlist>
+
+    private val editListeners = mutableListOf<Consumer<Playlist>>()
+    private val changeListeners = mutableListOf<Consumer<PlaylistStore>>()
+
+    init {
+        load()
+    }
+
+    fun add(song: Song, playlistName: String) {
+        val playlist = playlists.filter { it.name == playlistName }.first()
+        playlist.add(song.id)
+        store()
+        callEdit(playlist)
+    }
+
+    fun remove(song: Song, playlistName: String) {
+        val playlist = playlists.filter { it.name == playlistName }.first()
+        playlist.remove(song.id)
+        store()
+        callEdit(playlist)
+    }
+
+    fun store() {
+        playlists.filter { it != playlist }.forEach { Playlist.storePlaylist(it, dir) }
+    }
+
+    fun addEditListener(consumer: Consumer<Playlist>){
+        editListeners.add(consumer)
+    }
+
+    fun addChangeListener(consumer: Consumer<PlaylistStore>) {
+        changeListeners.add(consumer)
+    }
+
+    private fun callEdit(playlist: Playlist) {
+        editListeners.forEach { it.accept(playlist) }
+    }
+
+    private fun callChange() {
+        changeListeners.forEach { it.accept(this) }
+    }
+
+    fun load() {
+        playlists = listOf(playlist).plus(Playlist.findPlaylists(dir))
+    }
+
+    fun newPlaylist(string: String): Boolean {
+        if (playlists.any { it.name == string }) {
+            return false
+        }
+        playlists = playlists.plus(Playlist(mutableListOf(), string))
+        store()
+        callChange()
+        return true
     }
 }

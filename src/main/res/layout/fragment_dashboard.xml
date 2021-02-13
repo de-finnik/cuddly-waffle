@@ -15,7 +15,8 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
         <ImageView
-            android:src="@drawable/ic_baseline_shuffle_24"
+            android:id="@+id/iv_add_playlist"
+            android:src="@drawable/ic_baseline_add_24"
             android:layout_width="wrap_content"
             android:padding="10dp"
             android:layout_height="match_parent"/>

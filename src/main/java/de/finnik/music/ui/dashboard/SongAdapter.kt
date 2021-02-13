@@ -12,15 +12,18 @@ import android.widget.TextView
 import android.widget.Toast
 import de.finnik.music.R
 import de.finnik.music.songs.Song
+import java.util.function.Consumer
 
-class SongAdapter(context: Context, resource: Int, objects: List<Song>): ArrayAdapter<Song>(context, resource, objects){
+class SongAdapter(context: Context, resource: Int, objects: List<Song>, add_to_playlist: Consumer<Song>): ArrayAdapter<Song>(context, resource, objects){
     private val mContext: Context?
     private var mResource = 0
+    private val add_to_playlist: Consumer<Song>
 
 
     init {
         this.mContext = context
         this.mResource = resource
+        this.add_to_playlist = add_to_playlist
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -47,7 +50,7 @@ class SongAdapter(context: Context, resource: Int, objects: List<Song>): ArrayAd
         holder.uploader.text = song.artist
         holder.length.text = mContext?.resources?.getString(R.string.duration, info.duration / 60, info.duration % 60)
         holder.add_playlist.setOnClickListener {
-            Toast.makeText(context, song.title, Toast.LENGTH_SHORT).show()
+            add_to_playlist.accept(song)
         }
         return view!!
     }
