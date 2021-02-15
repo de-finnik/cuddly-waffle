@@ -1,12 +1,10 @@
-package de.finnik.music.ui
+package de.finnik.music.ui.dialogs
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.TextView
 import de.finnik.music.R
 

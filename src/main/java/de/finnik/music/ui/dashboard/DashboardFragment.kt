@@ -8,9 +8,7 @@ import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -18,13 +16,15 @@ import de.finnik.music.MainActivity
 import de.finnik.music.R
 import de.finnik.music.player.MusicPlayerService
 import de.finnik.music.songs.Song
-import de.finnik.music.ui.PlaylistDialog
+import de.finnik.music.ui.dialogs.PlaylistDialog
+import de.finnik.music.ui.dialogs.RenameDialog
 import java.util.function.Consumer
 
 
 class DashboardFragment : Fragment() {
 
     private lateinit var dashboardViewModel: DashboardViewModel
+    private lateinit var spinner_playlists: Spinner
 
     private var connectedToService = false
     private lateinit var musicPlayerService: MusicPlayerService
@@ -40,8 +40,13 @@ class DashboardFragment : Fragment() {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             connectedToService = true
             musicPlayerService = (service as MusicPlayerService.MusicBinder).service
-            musicPlayerService.initSongPlayer(mainActivity.songs)
-            (requireActivity() as MainActivity).musicPlayerView.setService(musicPlayerService)
+            if(musicPlayerService.isInitialized().not()) {
+                musicPlayerService.initSongPlayer(
+                    mainActivity.songs,
+                    mainActivity.getPlaylists()[spinner_playlists.selectedItemPosition]
+                )
+            }
+            mainActivity.musicPlayerView.setService(musicPlayerService)
         }
     }
 
@@ -67,10 +72,12 @@ class DashboardFragment : Fragment() {
                 dialog.show()
             })
         adapter
+
         val list_download = root.findViewById<ListView>(R.id.list_download)
         list_download.adapter = adapter
+        registerForContextMenu(list_download)
 
-        val spinner_playlists = root.findViewById<Spinner>(R.id.spinner_playlists)
+        spinner_playlists = root.findViewById<Spinner>(R.id.spinner_playlists)
 
         val spinner_adapter = ArrayAdapter<String>(
             requireContext(),
@@ -81,7 +88,7 @@ class DashboardFragment : Fragment() {
 
         mainActivity.songs.addListener(Consumer {
             list_download.post {
-                reloadSongs(spinner_playlists.selectedItemPosition)
+                reloadSongs()
             }
         })
 
@@ -95,7 +102,7 @@ class DashboardFragment : Fragment() {
                 position: Int,
                 id: Long
             ) {
-                reloadSongs(position)
+                reloadSongs()
             }
         }
 
@@ -134,7 +141,7 @@ class DashboardFragment : Fragment() {
         }
 
         mainActivity.playlistStore.addEditListener(Consumer {
-            reloadSongs(spinner_playlists.selectedItemPosition)
+            reloadSongs()
         })
 
         mainActivity.playlistStore.addChangeListener(Consumer {
@@ -148,8 +155,8 @@ class DashboardFragment : Fragment() {
         return root
     }
 
-    fun reloadSongs(index: Int) {
-        val playlist = mainActivity.getPlaylists()[index]
+    fun reloadSongs() {
+        val playlist = mainActivity.getPlaylists()[spinner_playlists.selectedItemPosition]
         playlist.ids.forEach { Log.i("TAG", "reloadSongs: $it") }
         displayingSongs.clear()
         displayingSongs.addAll(playlist.ids.map { mainActivity.songs.getId(it) })
@@ -165,5 +172,31 @@ class DashboardFragment : Fragment() {
 
             musicPlayerService.play(playlist.createQuery(index))
         }
+    }
+
+    override fun onCreateContextMenu(
+        menu: ContextMenu,
+        v: View,
+        menuInfo: ContextMenu.ContextMenuInfo?
+    ) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        if (v.id == R.id.list_download) {
+            menu.add(0, 0, 2, "Change title/artist")
+        }
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        if (item.groupId != 0) {
+            return false
+        }
+        val info = item.menuInfo as AdapterView.AdapterContextMenuInfo
+
+        val song = displayingSongs[info.position]
+
+        val dialog = RenameDialog(requireContext(), song, mainActivity.audio_dir, Consumer {
+            mainActivity.loadSongs()
+        })
+        dialog.show()
+        return super.onContextItemSelected(item)
     }
 }

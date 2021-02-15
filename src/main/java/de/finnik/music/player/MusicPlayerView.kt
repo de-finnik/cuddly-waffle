@@ -37,7 +37,9 @@ class MusicPlayerView(context: Context, attributeSet: AttributeSet) :
         this.musicPlayerService = musicPlayerService
         if(musicPlayerService.isPlaying()) {
             visibility = VISIBLE
+            displaySong(musicPlayerService.getCurrentSong())
         }
+
         musicPlayerService.addSongChangeListener(Consumer {
             if (visibility == GONE)
                 visibility = VISIBLE
@@ -49,6 +51,7 @@ class MusicPlayerView(context: Context, attributeSet: AttributeSet) :
         musicPlayerService.addPlayListener(Consumer {
             iv_play.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_pause))
         })
+
         iv_play.setOnClickListener {
             if (musicPlayerService.isPlaying())
                 musicPlayerService.ACTION_PAUSE()

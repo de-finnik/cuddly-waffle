@@ -1,7 +1,7 @@
 package de.finnik.music.songs
 
 open class QueryPlayer {
-    var queryList: List<String> = listOf()
+    lateinit var queryList: List<String>
     protected var index = 0
         set(value) {
             var mod = value % queryList.size

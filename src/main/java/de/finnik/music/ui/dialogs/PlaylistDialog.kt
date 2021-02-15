@@ -1,4 +1,4 @@
-package de.finnik.music.ui
+package de.finnik.music.ui.dialogs
 
 import android.app.AlertDialog
 import android.content.Context
@@ -26,7 +26,12 @@ class PlaylistDialog(
     init {
         val view = LayoutInflater.from(context).inflate(R.layout.dialog_add_to_playlist, null)
         val lv_playlists = view.findViewById<ListView>(R.id.lv_playlists)
-        adapter = PlaylistAdapter(context, R.layout.dialog_add_to_playlist, playlists, song)
+        adapter = PlaylistAdapter(
+            context,
+            R.layout.dialog_add_to_playlist,
+            playlists,
+            song
+        )
         lv_playlists.adapter = adapter
         dialog = AlertDialog.Builder(context)
             .setView(view)

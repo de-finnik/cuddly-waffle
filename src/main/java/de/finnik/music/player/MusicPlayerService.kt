@@ -12,10 +12,9 @@ import android.widget.SeekBar
 import de.finnik.music.songs.Playlist
 import de.finnik.music.songs.Song
 import de.finnik.music.songs.SongPlayer
-import java.io.File
 import java.util.function.Consumer
 
-class MusicPlayerService: Service() {
+class MusicPlayerService : Service() {
     lateinit var player: MediaPlayer
     private val binder = MusicBinder()
 
@@ -36,8 +35,13 @@ class MusicPlayerService: Service() {
         initSeekbars()
     }
 
-    fun initSongPlayer(songs: List<Song>) {
+    fun initSongPlayer(songs: List<Song>, playlist: Playlist) {
         songPlayer = SongPlayer(songs)
+        setPlaylist(playlist)
+    }
+
+    fun isInitialized(): Boolean {
+        return this::songPlayer.isInitialized
     }
 
     fun setPlaylist(playlist: Playlist) {
@@ -128,7 +132,7 @@ class MusicPlayerService: Service() {
         songChange()
     }
 
-    fun getCurrentSong():Song {
+    fun getCurrentSong(): Song {
         return songPlayer.getCurrentSong()
     }
 

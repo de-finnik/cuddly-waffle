@@ -16,7 +16,7 @@ import de.finnik.music.MainActivity
 import de.finnik.music.download.DownloadTask
 import de.finnik.music.R
 import de.finnik.music.download.DownloadNotification
-import de.finnik.music.ui.ProgressDialog
+import de.finnik.music.ui.dialogs.ProgressDialog
 import java.io.File
 import java.lang.ref.WeakReference
 import kotlin.collections.ArrayList
@@ -43,7 +43,10 @@ class HomeFragment : Fragment() {
         btn_search.setOnClickListener {
             val text = et_search.text.toString()
             if (text.isNotEmpty()) {
-                val progressDialog = ProgressDialog(requireContext(), "Durchsuche YouTube nach $text!")
+                val progressDialog = ProgressDialog(
+                    requireContext(),
+                    "Durchsuche YouTube nach $text!"
+                )
                 LoadTask(this, progressDialog).execute(text, (seekBar.progress+1).toString())
             }
        }

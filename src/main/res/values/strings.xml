@@ -10,4 +10,7 @@
     <string name="ok">OK</string>
     <string name="new_playlist">Create a new playlist</string>
     <string name="cancel">Cancel</string>
+    <string name="title">Song title:</string>
+    <string name="artist">Song writer:</string>
+    <string name="empty_input">Input may not be empty!</string>
 </resources>

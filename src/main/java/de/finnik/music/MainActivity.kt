@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
         loadSongs()
         playlistStore = PlaylistStore(playlist_dir)
 
-        File(application.filesDir, "playlist").listFiles().forEach {
+        File(application.filesDir, "audio").listFiles().forEach {
             Log.i("TAG", "onCreate: filelist: ${it.absolutePath}")
         }
     }
