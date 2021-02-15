@@ -63,5 +63,6 @@ class MusicPlayerView(context: Context, attributeSet: AttributeSet) :
         iv_thumbnail.setImageDrawable(BitmapDrawable(context.resources, song.thumbnail))
         tv_title.setText(song.title)
         tv_artist.setText(song.artist)
+        iv_play.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_pause))
     }
 }

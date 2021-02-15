@@ -12,6 +12,7 @@ import androidx.core.app.NotificationManagerCompat
 import de.finnik.music.R
 import de.finnik.music.songs.Song
 import de.finnik.music.Utils
+import de.finnik.music.ui.player.PlayerActivity
 
 class MusicNotification(val context: Context) {
     private val channelId = "CHANNEL_1"
@@ -45,6 +46,7 @@ class MusicNotification(val context: Context) {
             .addAction(action)
             .addAction(actionNext)
             .setColor(colors[song.id]!!)
+            .setContentIntent(PendingIntent.getActivity(context, 100, Intent(context, PlayerActivity::class.java), 0))
             .setStyle(androidx.media.app.NotificationCompat.MediaStyle().setShowActionsInCompactView(0,1,2))
     }
 

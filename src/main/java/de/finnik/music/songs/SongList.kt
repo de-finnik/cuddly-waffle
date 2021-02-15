@@ -39,11 +39,6 @@ open class ObservableList<T> : ArrayList<T>() {
         return addAll
     }
 
-    override fun clear() {
-        super.clear()
-        change()
-    }
-
     override fun remove(element: T): Boolean {
         val remove = super.remove(element)
         change()

@@ -5,6 +5,7 @@ import java.io.BufferedWriter
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
+import java.util.*
 import java.util.function.Consumer
 
 class Playlist(val ids: MutableList<String>, val name: String) {
@@ -22,6 +23,12 @@ class Playlist(val ids: MutableList<String>, val name: String) {
         if (ids.contains(id)) {
             ids.remove(id)
         }
+    }
+
+    fun createQuery(index: Int):List<String> {
+        val query = ids.toList()
+        Collections.rotate(query, size() - index)
+        return query
     }
 
     fun size(): Int {
@@ -53,46 +60,8 @@ class Playlist(val ids: MutableList<String>, val name: String) {
     }
 }
 
-open class PlaylistPlayer {
-    open var playlist: Playlist = Playlist(mutableListOf(), "")
-    protected var index = 0
-        set(value) {
-            var mod = value % playlist.size()
-            if (mod < 0) {
-                mod += playlist.size()
-            }
-            field = mod
-        }
 
-
-    fun play(index: Int) {
-        this.index = index
-    }
-
-    fun next() {
-        index++
-    }
-
-    fun previous() {
-        index--
-    }
-
-    fun getCurrent(): String {
-        return playlist[index]
-    }
-}
-
-class SongPlayer(val songs: List<Song>, playlist: Playlist) : PlaylistPlayer() {
-    init {
-        this.playlist = playlist
-    }
-
-    fun getCurrentSong(): Song {
-        return songs.filter { it.id == getCurrent() }.first()
-    }
-}
-
-class PlaylistStore(val playlist: Playlist, val dir: File) {
+class PlaylistStore(val dir: File) {
     lateinit var playlists: List<Playlist>
 
     private val editListeners = mutableListOf<Consumer<Playlist>>()
@@ -117,7 +86,7 @@ class PlaylistStore(val playlist: Playlist, val dir: File) {
     }
 
     fun store() {
-        playlists.filter { it != playlist }.forEach { Playlist.storePlaylist(it, dir) }
+        playlists.forEach { Playlist.storePlaylist(it, dir) }
     }
 
     fun addEditListener(consumer: Consumer<Playlist>){
@@ -137,7 +106,7 @@ class PlaylistStore(val playlist: Playlist, val dir: File) {
     }
 
     fun load() {
-        playlists = listOf(playlist).plus(Playlist.findPlaylists(dir))
+        playlists = Playlist.findPlaylists(dir)
     }
 
     fun newPlaylist(string: String): Boolean {

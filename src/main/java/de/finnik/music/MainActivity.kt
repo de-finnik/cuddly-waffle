@@ -86,7 +86,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         loadSongs()
-        playlistStore = PlaylistStore(Playlist(songs.map { it.id }.toMutableList(), getString(R.string.playlist_all)), playlist_dir)
+        playlistStore = PlaylistStore(playlist_dir)
 
         File(application.filesDir, "playlist").listFiles().forEach {
             Log.i("TAG", "onCreate: filelist: ${it.absolutePath}")
@@ -96,6 +96,11 @@ class MainActivity : AppCompatActivity() {
     fun loadSongs() {
         songs.clear()
         songs.addAll(Song.findSongs(audio_dir))
+    }
+
+    fun getPlaylists(): List<Playlist> {
+        return listOf(Playlist(songs.map { it.id }.toMutableList(), getString(R.string.playlist_all)))
+            .plus(playlistStore.playlists)
     }
 
     fun updateYoutubeDL() {

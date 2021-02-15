@@ -36,12 +36,12 @@ class MusicPlayerService: Service() {
         initSeekbars()
     }
 
-    fun initSongPlayer(songs: List<Song>, playlist: Playlist) {
-        songPlayer = SongPlayer(songs, playlist)
+    fun initSongPlayer(songs: List<Song>) {
+        songPlayer = SongPlayer(songs)
     }
 
     fun setPlaylist(playlist: Playlist) {
-        songPlayer.playlist = playlist
+        songPlayer.play(playlist.ids)
     }
 
     private fun initSeekbars() {
@@ -112,9 +112,6 @@ class MusicPlayerService: Service() {
 
     fun addSongChangeListener(consumer: Consumer<Song>) {
         onSongChange.add(consumer)
-        if (isPlaying()) {
-            consumer.accept(songPlayer.getCurrentSong())
-        }
     }
 
     fun addPauseListener(consumer: Consumer<Song>) {
@@ -125,10 +122,14 @@ class MusicPlayerService: Service() {
         onPlay.add(consumer)
     }
 
-    fun play(index: Int) {
-        songPlayer.play(index)
+    fun play(query: List<String>) {
+        songPlayer.play(query)
 
         songChange()
+    }
+
+    fun getCurrentSong():Song {
+        return songPlayer.getCurrentSong()
     }
 
     fun isPlaying(): Boolean {

@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +17,6 @@ import androidx.lifecycle.ViewModelProvider
 import de.finnik.music.MainActivity
 import de.finnik.music.R
 import de.finnik.music.player.MusicPlayerService
-import de.finnik.music.songs.Playlist
 import de.finnik.music.songs.Song
 import de.finnik.music.ui.PlaylistDialog
 import java.util.function.Consumer
@@ -40,10 +40,7 @@ class DashboardFragment : Fragment() {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             connectedToService = true
             musicPlayerService = (service as MusicPlayerService.MusicBinder).service
-            musicPlayerService.initSongPlayer(
-                mainActivity.songs,
-                mainActivity.playlistStore.playlists[0]
-            )
+            musicPlayerService.initSongPlayer(mainActivity.songs)
             (requireActivity() as MainActivity).musicPlayerView.setService(musicPlayerService)
         }
     }
@@ -78,13 +75,13 @@ class DashboardFragment : Fragment() {
         val spinner_adapter = ArrayAdapter<String>(
             requireContext(),
             android.R.layout.simple_spinner_item,
-            mainActivity.playlistStore.playlists.map { it.name })
+            mainActivity.getPlaylists().map { it.name })
         spinner_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner_playlists.adapter = spinner_adapter
 
         mainActivity.songs.addListener(Consumer {
-            requireActivity().runOnUiThread {
-                adapter.notifyDataSetChanged()
+            list_download.post {
+                reloadSongs(spinner_playlists.selectedItemPosition)
             }
         })
 
@@ -98,14 +95,12 @@ class DashboardFragment : Fragment() {
                 position: Int,
                 id: Long
             ) {
-                reloadSongs(mainActivity.playlistStore.playlists[position])
-                if (this@DashboardFragment.connectedToService)
-                    musicPlayerService.setPlaylist(mainActivity.playlistStore.playlists[position])
+                reloadSongs(position)
             }
         }
 
         list_download.setOnItemClickListener { parent, view, position, id ->
-            play(position)
+            play(position, spinner_playlists.selectedItemPosition)
         }
 
         val iv_add_playlist = root.findViewById<ImageView>(R.id.iv_add_playlist)
@@ -139,12 +134,12 @@ class DashboardFragment : Fragment() {
         }
 
         mainActivity.playlistStore.addEditListener(Consumer {
-                reloadSongs(mainActivity.playlistStore.playlists[spinner_playlists.selectedItemPosition])
+            reloadSongs(spinner_playlists.selectedItemPosition)
         })
 
         mainActivity.playlistStore.addChangeListener(Consumer {
             spinner_adapter.clear()
-            spinner_adapter.addAll(mainActivity.playlistStore.playlists.map { it.name })
+            spinner_adapter.addAll(mainActivity.getPlaylists().map { it.name })
         })
 
         Intent(requireActivity(), MusicPlayerService::class.java).also { intent ->
@@ -153,15 +148,22 @@ class DashboardFragment : Fragment() {
         return root
     }
 
-    fun reloadSongs(playlist: Playlist) {
+    fun reloadSongs(index: Int) {
+        val playlist = mainActivity.getPlaylists()[index]
+        playlist.ids.forEach { Log.i("TAG", "reloadSongs: $it") }
         displayingSongs.clear()
         displayingSongs.addAll(playlist.ids.map { mainActivity.songs.getId(it) })
         adapter.notifyDataSetChanged()
     }
 
-    fun play(index: Int) {
+    fun play(index: Int, playlistIndex: Int) {
         if (connectedToService) {
-            musicPlayerService.play(index)
+            val playlist = mainActivity.getPlaylists()[playlistIndex]
+            if (this@DashboardFragment.connectedToService) {
+                musicPlayerService.setPlaylist(playlist)
+            }
+
+            musicPlayerService.play(playlist.createQuery(index))
         }
     }
 }

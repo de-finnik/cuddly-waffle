@@ -9,6 +9,7 @@ import android.graphics.drawable.BitmapDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
@@ -17,6 +18,7 @@ import de.finnik.music.MainActivity
 import de.finnik.music.R
 import de.finnik.music.Utils
 import de.finnik.music.player.MusicPlayerService
+import de.finnik.music.songs.Song
 import java.util.function.Consumer
 
 class PlayerActivity : Activity() {
@@ -42,16 +44,17 @@ class PlayerActivity : Activity() {
             musicPlayerService = (service as MusicPlayerService.MusicBinder).service
             musicPlayerService.registerSeekBar(sb_duration)
             musicPlayerService.addSongChangeListener(Consumer {
-                iv_thumbnail.setImageDrawable(BitmapDrawable(resources, it.thumbnail))
-                tv_title.setText(it.title)
-                tv_artist.setText(it.artist)
-            })
+                display(it)
+           })
             musicPlayerService.addPlayListener(Consumer {
                 iv_play.setImageDrawable(ContextCompat.getDrawable(applicationContext, R.drawable.ic_pause))
             })
             musicPlayerService.addPauseListener(Consumer {
                 iv_play.setImageDrawable(ContextCompat.getDrawable(applicationContext, R.drawable.ic_play))
             })
+            if(musicPlayerService.isPlaying()) {
+                display(musicPlayerService.getCurrentSong())
+            }
         }
     }
 
@@ -86,7 +89,11 @@ class PlayerActivity : Activity() {
         Intent(this, MusicPlayerService::class.java).also { intent ->
             bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
         }
+    }
 
-
+    fun display(song: Song) {
+        iv_thumbnail.setImageDrawable(BitmapDrawable(resources, song.thumbnail))
+        tv_title.setText(song.title)
+        tv_artist.setText(song.artist)
     }
 }

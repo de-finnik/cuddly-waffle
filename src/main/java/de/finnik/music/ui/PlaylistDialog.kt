@@ -2,7 +2,6 @@ package de.finnik.music.ui
 
 import android.app.AlertDialog
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,7 +33,12 @@ class PlaylistDialog(
             .create()
         view.findViewById<Button>(R.id.btn_submit).setOnClickListener { dialog.dismiss() }
         dialog.setOnDismissListener {
-            adapter.selectedPlaylists.forEach { t, u -> if(u) store.add(song, t.name) else store.remove(song, t.name)}
+            adapter.selectedPlaylists.forEach { t, u ->
+                if (u) store.add(
+                    song,
+                    t.name
+                ) else store.remove(song, t.name)
+            }
         }
     }
 
@@ -58,9 +62,6 @@ class PlaylistAdapter(context: Context, resource: Int, objects: List<Playlist>, 
             val checkBox = CheckBox(context)
             val playlist = getItem(position)!!
             checkBox.setText(playlist.name)
-            if (checkBox.text == context.getString(R.string.playlist_all)) {
-                checkBox.isEnabled = false
-            }
             checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
                 selectedPlaylists.put(playlist, isChecked)
             }
